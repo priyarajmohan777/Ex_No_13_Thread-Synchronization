@@ -1,4 +1,4 @@
-# Ex_No_11_Thread-Synchronization
+# Ex_No_13_Thread-Synchronization
 Develop a program to perform Thread Synchronization using Android Studio
 ## AIM:
 To Develop a program to perform Thread Synchronization using Android Studio.
@@ -28,24 +28,154 @@ Step 7: Save and run the application.
  ```
 /*
 Program to create an Option Menu
-Developed by: 
-RegisterNumber:  
+Developed by: Priya R
+Register Number:  212222040124
 */
 ```
+### activity_main.xml:
+```
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
-## MainActivity.java:
+    <!-- A text view to display the count -->
+    <TextView
+        android:id="@+id/text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="32sp"
+        app:layout_constraintBottom_toTopOf="@+id/increment_button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- A button to increment the count -->
+    <Button
+        android:id="@+id/increment_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="incrementCounter"
+        android:text="Increment"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+```
+### MainActivity.java:
+```
+package com.example.threadsyn;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.concurrent.Semaphore;
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
+    // Object used for synchronizing access to counter
+    private static final Object lock = new Object();
+
+    // Maximum number of concurrent threads
+    // that can access the counter
+    private static final int MAX_THREADS = 5;
+
+    // Semaphore to limit concurrent access to the counter
+    private static final Semaphore semaphore = new Semaphore(MAX_THREADS);
+
+    // Counter to store the
+    // number of button clicks
+    private int counter = 0;
+
+    // Reference to the text view to
+    // display the number of button clicks
+    private TextView textView;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        textView = findViewById(R.id.text_view);
+    }
+    public void incrementCounter(View view) {
+        // Start a new thread to increment the counter
+        new Thread(() -> {
+            try {
+                // Acquire the semaphore
+                semaphore.acquire();
+                // Synchronized block to update the counter
+                synchronized (lock) {
+                    counter++;
+                }
+            } catch (InterruptedException e) {
+                // Log an error if the thread is interrupted
+                Log.e(TAG, "Thread interrupted", e);
+            } finally {
+                // Release the semaphore
+                semaphore.release();
+            }
+            // Update the text view on the main thread
+            updateTextView();
+        }).start();
+    }
+
+    // Method to update the text view on the main thread
+    private void updateTextView() {
+        // Post the update to the main thread's message queue
+        new Handler(getMainLooper()).post(() -> textView.setText(String.valueOf(counter)));
+    }
+
+}
+```
+### AndroidMainfest.xml
+```
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Ex_13"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+```
 
 
+## Output:
 
+![image](https://github.com/user-attachments/assets/24cea6ce-5e72-47fb-a8ab-8eb4ffd1d312)
 
-
-## activity_main.xml:
-
-
-## AndroidMainfest.xml
-
-## Output
-
+![image](https://github.com/user-attachments/assets/a05ea6fd-0cbc-4d64-b193-9f5d1cde301e)
 
 
 ## Result:
